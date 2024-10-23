@@ -1,0 +1,31 @@
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        async function streamResponse() {
+            const response = await puter.ai.chat(
+                "Explain the theory of relativity in detail",
+                {stream: true}
+            );
+
+            // Get the output div where the parsed HTML will be displayed
+            const outputDiv = document.getElementById('output');
+
+            for await (const part of response) {
+                // Convert markdown to HTML using marked.js
+                const html = marked.parse(part?.text);
+                
+                // Append the HTML content to the output div
+                outputDiv.innerHTML += html;
+            }
+        }
+
+        streamResponse();
+    </script>
+</body>
+</html>
