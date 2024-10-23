@@ -3,29 +3,49 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <div id="output"></div>
+    <h1>AI Chat Interface</h1>
+
+    <!-- Prompt input field -->
+    <div>
+        <label for="prompt">Enter your prompt:</label>
+        <input type="text" id="prompt" style="width: 400px;" placeholder="Type your question here" />
+        <button onclick="submitPrompt()">Submit</button>
+    </div>
+
+    <!-- Output box -->
+    <div id="output" style="border: 1px solid #000; padding: 10px; margin-top: 20px; width: 600px; height: 300px; overflow-y: auto;"></div>
 
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        async function streamResponse() {
-            const response = await puter.ai.chat(
-                "Explain the theory of relativity in detail",
-                {stream: true}
-            );
-
-            // Get the output div where the parsed HTML will be displayed
+        async function streamResponse(prompt) {
+            // Clear old output
             const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
 
-            for await (const part of response) {
-                // Convert markdown to HTML using marked.js
-                const html = marked.parse(part?.text);
-                
-                // Append the HTML content to the output div
-                outputDiv.innerHTML += html;
+            try {
+                const response = await puter.ai.chat(prompt, {stream: true});
+
+                for await (const part of response) {
+                    // Convert markdown to HTML using marked.js
+                    const html = marked.parse(part?.text);
+
+                    // Append the HTML content to the output div
+                    outputDiv.innerHTML += html;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = '<p style="color:red;">Error fetching response: ' + error.message + '</p>';
             }
         }
 
-        streamResponse();
+        // Function to handle prompt submission
+        function submitPrompt() {
+            const prompt = document.getElementById('prompt').value;
+            if (prompt.trim()) {
+                streamResponse(prompt);
+            } else {
+                alert('Please enter a valid prompt');
+            }
+        }
     </script>
 </body>
 </html>
